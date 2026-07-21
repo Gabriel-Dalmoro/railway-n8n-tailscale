@@ -14,6 +14,7 @@ COPY --from=tailscale /usr/local/bin/tailscaled /usr/local/bin/tailscaled
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
-USER node
+# Keep USER root so start.sh can manage tailscaled and set directory permissions
+USER root
 
 ENTRYPOINT ["/start.sh"]
