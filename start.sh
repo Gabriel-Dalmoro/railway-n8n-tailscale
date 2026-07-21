@@ -1,10 +1,14 @@
 #!/bin/sh
 
-# Start Tailscale daemon in userspace mode (for unprivileged containers)
+# Ensure /home/node/.n8n exists and is owned by the node user (UID 1000)
+mkdir -p /home/node/.n8n
+chown -R node:node /home/node/.n8n
+
+# Start Tailscale daemon in userspace mode as root
 tailscaled --tun=userspace-networking --socks5-server=localhost:1055 &
 
-# Connect to Tailscale using Railway Environment Variable
+# Connect to Tailscale
 tailscale up --authkey=${TAILSCALE_AUTHKEY} --hostname=railway-n8n &
 
-# Start n8n engine (preserves default behavior)
-exec n8n start
+# Execute n8n as the unprivileged 'node' user
+exec su -s /bin/sh node -c "n8n start"
